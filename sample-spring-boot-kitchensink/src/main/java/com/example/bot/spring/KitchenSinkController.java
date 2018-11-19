@@ -199,9 +199,9 @@ public class KitchenSinkController {
     throws Exception {
         String text = content.getText();
         String[] pesan = text.split(" ");
-        String mode = pesan[0].toLowerCase();
+        String methods = pesan[0].toLowerCase();
 
-        switch (mode) {
+        switch (methods) {
             case "save": {
                 if(!bossStatus){
                     if(pesan.length<3){
@@ -233,8 +233,7 @@ public class KitchenSinkController {
                 break;
             }
             case "boss": {
-                bossStat = true;
-                muteMode = false;
+                bossStatus = true;
                 String url = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Frss.detik.com%2Findex.php%2Fdetikcom";
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -262,7 +261,7 @@ public class KitchenSinkController {
                         if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
                         } else {
                             String t2 = doc.select("#detikdetailtext .lihatjg").text();
-                            String[] tx = t.split(t2);
+                            String[] tx = methods.split(t2);
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
                         }
