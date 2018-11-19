@@ -336,7 +336,7 @@ public class KitchenSinkController {
                         this.replyText(replyToken,"Data yang diberikan kurang lengkap");
                     }
                     else{
-                        int index_1 = text.indexOf( ' ' );
+                        index_1 = text.indexOf( ' ' );
                         String key = text.substring(0,index_1);
                         String value = text.substring(index_1+1,text.length());
                         storedText.put(key,value);
@@ -360,7 +360,7 @@ public class KitchenSinkController {
             // }
             case "Load": {
                 if(!bossStat){
-                    int index_1 = text.indexOf( ' ' );
+                    index_1 = text.indexOf( ' ' );
                     String key = text.substring(0,index_1);
                     String r;
                     if(storedText.containsKey(key)){
