@@ -192,48 +192,19 @@ public class KitchenSinkController {
         );
     }
 
-    boolean bossStatus = false;
     HashMap<String,String> storedText = new HashMap<String,String>();
+    boolean bossStat = false;
 
     private void handleTextContent(String replyToken, Event event, TextMessageContent content)
     throws Exception {
+
         String text = content.getText();
-        String[] pesan = text.split(" ");
-        String methods = pesan[0].toLowerCase();
-
-        switch (methods) {
-            case "save": {
-                if(!bossStatus){
-                    if(pesan.length<3){
-                        this.replyText(replyToken,"Data yang diberikan kurang lengkap");
-                    }
-                    else{
-                        String inputText = "";
-                        for(int i = 2;i<pesan.length;i++){
-                            inputText += pesan[i]+" ";
-                        }
-                        storedText.put(pesan[1],inputText);
-                        this.replyText(replyToken,"OK");
-                    }
-
-                }
-                break;
-            }
-            case "load": {
-                if(!bossStatus){
-                    String r = "";
-                    if(storedText.containsKey(pesan[1])){
-                        r = storedText.get(pesan[1])+"";
-                    }
-                    else{
-                        r = "Kata Kunci Pencarian Tidak Ditemukan";
-                    }
-                    this.replyText(replyToken,r);
-                }
-                break;
-            }
+        String[] tArr = text.split(" ");
+        String t = tArr[0].toLowerCase();
+        log.info("Got text message from {}: {}", replyToken, text);
+        switch (t) {
             case "boss": {
-                bossStatus = true;
+                bossStat = true;
                 String url = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Frss.detik.com%2Findex.php%2Fdetikcom";
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -261,7 +232,7 @@ public class KitchenSinkController {
                         if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
                         } else {
                             String t2 = doc.select("#detikdetailtext .lihatjg").text();
-                            String[] tx = methods.split(t2);
+                            String[] tx = t.split(t2);
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
                         }
@@ -277,20 +248,37 @@ public class KitchenSinkController {
                 break;
             }
             case "noboss": {
-                bossStatus = false;
+                bossStat = false;
                 this.replyText(replyToken,"OK");
                 break;
             }
-            case "bye": {
-                Source source = event.getSource();
-                if (source instanceof GroupSource) {
-                    this.replyText(replyToken, "Byeee");
-                    lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
-                } else if (source instanceof RoomSource) {
-                    this.replyText(replyToken, "Byeee");
-                    lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
-                } else {
-                    this.replyText(replyToken, "Tidak dapat meninggalkan chat 1:1");
+            case "save": {
+                if(!bossStat){
+                    if(tArr.length<3){
+                        this.replyText(replyToken,"Data yang diberikan kurang lengkap");
+                    }
+                    else{
+                        String inputText = "";
+                        for(int i = 2;i<tArr.length;i++){
+                            inputText += tArr[i]+" ";
+                        }
+                        storedText.put(tArr[1],inputText);
+                        this.replyText(replyToken,"OK");
+                    }
+
+                }
+                break;
+            }
+            case "load": {
+                if(!bossStat){
+                    String r = "";
+                    if(storedText.containsKey(tArr[1])){
+                        r = storedText.get(tArr[1])+"";
+                    }
+                    else{
+                        r = "Kata Kunci Pencarian Tidak Ditemukan";
+                    }
+                    this.replyText(replyToken,r);
                 }
                 break;
             }
@@ -315,12 +303,26 @@ public class KitchenSinkController {
 
                     });
                 } else {
-                    this.replyText(replyToken, "User ID tidak");
+                    this.replyText(replyToken, "User ID tidak tersedia");
+                }
+                break;
+            }
+            case "bye": {
+                Source source = event.getSource();
+                if (source instanceof GroupSource) {
+                    this.replyText(replyToken, "Byeee");
+                    lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
+                } else if (source instanceof RoomSource) {
+                    this.replyText(replyToken, "Byeee");
+                    lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
+                } else {
+                    this.replyText(replyToken, "Tidak dapat meninggalkan chat 1:1");
                 }
                 break;
             }
             default:
             break;
+
         }
     }
 
