@@ -198,21 +198,21 @@ public class KitchenSinkController {
     private void handleTextContent(String replyToken, Event event, TextMessageContent content)
     throws Exception {
         String text = content.getText();
-        String[] message = text.split(" ");
-        String mode = message[0].toLowerCase();
+        String[] pesan = text.split(" ");
+        String mode = pesan[0].toLowerCase();
 
         switch (mode) {
             case "save": {
                 if(!bossStatus){
-                    if(message.length<3){
+                    if(pesan.length<3){
                         this.replyText(replyToken,"Data yang diberikan kurang lengkap");
                     }
                     else{
                         String inputText = "";
-                        for(int i = 2;i<message.length;i++){
-                            inputText += message[i]+" ";
+                        for(int i = 2;i<pesan.length;i++){
+                            inputText += pesan[i]+" ";
                         }
-                        storedText.put(message[1],inputText);
+                        storedText.put(pesan[1],inputText);
                         this.replyText(replyToken,"OK");
                     }
 
@@ -222,8 +222,8 @@ public class KitchenSinkController {
             case "load": {
                 if(!bossStatus){
                     String r = "";
-                    if(storedText.containsKey(message[1])){
-                        r = storedText.get(message[1])+"";
+                    if(storedText.containsKey(pesan[1])){
+                        r = storedText.get(pesan[1])+"";
                     }
                     else{
                         r = "Kata Kunci Pencarian Tidak Ditemukan";
@@ -233,7 +233,8 @@ public class KitchenSinkController {
                 break;
             }
             case "boss": {
-                bossStatus = true;
+                bossStat = true;
+                muteMode = false;
                 String url = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Frss.detik.com%2Findex.php%2Fdetikcom";
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -252,8 +253,8 @@ public class KitchenSinkController {
                 String m = jj.getString("link");
                 Document doc = Jsoup.connect(m).get();
                 Elements links = doc.select("#detikdetailtext");
-                String news = "";
-                LinkedList<Message> news = new LinkedList<news>();
+                String message = "";
+                LinkedList<Message> messages = new LinkedList<Message>();
                 for (Element link : links) {
                     if (link.attr("id").equalsIgnoreCase("detikdetailtext")) {
                         message = doc.select("#detikdetailtext").text();
@@ -261,13 +262,19 @@ public class KitchenSinkController {
                         if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
                         } else {
                             String t2 = doc.select("#detikdetailtext .lihatjg").text();
-                            String[] tx = text.split(t2);
+                            String[] tx = t.split(t2);
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
                         }
+
                     }
                 }
-                this.reply(replyToken,messages);
+
+                this.reply(
+                replyToken,
+                messages
+                );
+
                 break;
             }
             case "noboss": {
