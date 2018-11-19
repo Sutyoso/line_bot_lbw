@@ -201,10 +201,15 @@ public class KitchenSinkController {
     throws Exception {
 
 
+        // String text = content.getText();
+        // String[] tArr = text.split(" ");
+        // String t = tArr[0].toLowerCase();
+        // log.info("Got text message from {}: {}", replyToken, text);
         String text = content.getText();
-        String[] tArr = text.split(" ");
-        String t = tArr[0].toLowerCase();
-        log.info("Got text message from {}: {}", replyToken, text);
+        int index_1 = text.indexOf(' ');
+        String t = text.substring(0, index_1);
+        text = text.substring(index_1 + 1, text.length());
+        
         switch (t) {
             // case "mute": {
             //     if(!bossStat){
