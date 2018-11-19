@@ -209,7 +209,7 @@ public class KitchenSinkController {
         int index_1 = text.indexOf(' ');
         String t = text.substring(0, index_1);
         text = text.substring(index_1 + 1, text.length());
-        
+
         switch (t) {
             // case "mute": {
             //     if(!bossStat){
@@ -360,8 +360,8 @@ public class KitchenSinkController {
             // }
             case "Load": {
                 if(!bossStat){
-                    index_1 = text.indexOf( ' ' );
-                    key = text.substring(0,index_1);
+                    int index_1 = text.indexOf( ' ' );
+                    String key = text.substring(0,index_1);
                     String r;
                     if(storedText.containsKey(key)){
                         r = storedText.get(key)+"";
