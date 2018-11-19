@@ -200,6 +200,7 @@ public class KitchenSinkController {
     private void handleTextContent(String replyToken, Event event, TextMessageContent content)
     throws Exception {
 
+
         String text = content.getText();
         String[] tArr = text.split(" ");
         String t = tArr[0].toLowerCase();
@@ -257,167 +258,138 @@ public class KitchenSinkController {
                     }
                 }
 
-        this.reply(
-        replyToken,
-        messages
-        );
-
-        break;
-    }
-    case "noboss": {
-        bossStat = false;
-        this.replyText(replyToken,"OK bosqu");
-        break;
-    }
-    case "save": {
-        if(!bossStat){
-            if(tArr.length<3){
-                this.replyText(replyToken,"data yang mau disimpan belum ada bosqu");
-            }
-            else{
-                String inputText = "";
-                for(int i = 2;i<tArr.length;i++){
-                    inputText += tArr[i]+" ";
-                }
-                storedText.put(tArr[1],inputText);
-                this.replyText(replyToken,"siap bosqu");
-            }
-
-        }
-        break;
-    }
-    case "load": {
-        if(!bossStat){
-            String r = "";
-            if(storedText.containsKey(tArr[1])){
-                r = storedText.get(tArr[1])+"";
-            }
-            else{
-                r = "kunci ngga ketemu bosqu";
-            }
-            this.replyText(replyToken,r);
-        }
-        break;
-    }
-    case "profile": {
-        String userId = event.getSource().getUserId();
-        if (userId != null) {
-            lineMessagingClient
-            .getProfile(userId)
-            .whenComplete((profile, throwable) -> {
-                if (throwable != null) {
-                    this.replyText(replyToken, throwable.getMessage());
-                    return;
-                }
-
                 this.reply(
                 replyToken,
-                Arrays.asList(new TextMessage(
-                "Display name: " + profile.getDisplayName()),
-                new TextMessage("Status message: "
-                + profile.getStatusMessage()))
+                messages
                 );
 
-            });
-        } else {
-            this.replyText(replyToken, "Bot can't use profile API without user ID");
+                break;
+            }
+            case "noboss": {
+                bossStat = false;
+                this.replyText(replyToken,"OK bosqu");
+                break;
+            }
+            case "save": {
+                if(!bossStat){
+                    if(tArr.length<3){
+                        this.replyText(replyToken,"data yang mau disimpan belum ada bosqu");
+                    }
+                    else{
+                        String inputText = "";
+                        for(int i = 2;i<tArr.length;i++){
+                            inputText += tArr[i]+" ";
+                        }
+                        storedText.put(tArr[1],inputText);
+                        this.replyText(replyToken,"siap bosqu");
+                    }
+
+                }
+                break;
+            }
+            case "load": {
+                if(!bossStat){
+                    String r = "";
+                    if(storedText.containsKey(tArr[1])){
+                        r = storedText.get(tArr[1])+"";
+                    }
+                    else{
+                        r = "kunci ngga ketemu bosqu";
+                    }
+                    this.replyText(replyToken,r);
+                }
+                break;
+            }
+            case "profile": {
+                String userId = event.getSource().getUserId();
+                if (userId != null) {
+                    lineMessagingClient
+                    .getProfile(userId)
+                    .whenComplete((profile, throwable) -> {
+                        if (throwable != null) {
+                            this.replyText(replyToken, throwable.getMessage());
+                            return;
+                        }
+
+                        this.reply(
+                        replyToken,
+                        Arrays.asList(new TextMessage(
+                        "Display name: " + profile.getDisplayName()),
+                        new TextMessage("Status message: "
+                        + profile.getStatusMessage()))
+                        );
+
+                    });
+                } else {
+                    this.replyText(replyToken, "Bot can't use profile API without user ID");
+                }
+                break;
+            }
+            case "bye": {
+                Source source = event.getSource();
+                if (source instanceof GroupSource) {
+                    this.replyText(replyToken, "Leaving group");
+                    lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
+                } else if (source instanceof RoomSource) {
+                    this.replyText(replyToken, "Leaving room");
+                    lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
+                } else {
+                    this.replyText(replyToken, "Bot can't leave from 1:1 chat");
+                }
+                break;
+            }
+            default:
+            if(!muteMode){
+                break;
+            }
         }
-        break;
     }
-    case "bye": {
-        Source source = event.getSource();
-        if (source instanceof GroupSource) {
-            this.replyText(replyToken, "Leaving group");
-            lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
-        } else if (source instanceof RoomSource) {
-            this.replyText(replyToken, "Leaving room");
-            lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
-        } else {
-            this.replyText(replyToken, "Bot can't leave from 1:1 chat");
+
+    private static String createUri(String path) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+        .path(path).build()
+        .toUriString();
+    }
+
+    private void system(String... args) {
+        ProcessBuilder processBuilder = new ProcessBuilder(args);
+        try {
+            Process start = processBuilder.start();
+            int i = start.waitFor();
+            log.info("result: {} =>  {}", Arrays.toString(args), i);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            log.info("Interrupted", e);
+            Thread.currentThread().interrupt();
         }
-        break;
     }
-    default:
-    if(!muteMode){
-        log.info("Returns echo message {}: {}", replyToken, text);
-        String input = "input="+t;
-        String url = "https://www.cleverbot.com/getreply?key=CC50oBRajftdHPTciiKYAjkPpnA" + "&" + input;
-        if(!cleverbotState.equals("")){
-            url += "&cs=" + cleverbotState;
+
+    private static DownloadedContent saveContent(String ext, MessageContentResponse responseBody) {
+        log.info("Got content-type: {}", responseBody);
+
+        DownloadedContent tempFile = createTempFile(ext);
+        try (OutputStream outputStream = Files.newOutputStream(tempFile.path)) {
+            ByteStreams.copy(responseBody.getStream(), outputStream);
+            log.info("Saved {}: {}", ext, tempFile);
+            return tempFile;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        //int status = con.getResponseCode();
-        //con.getInputStream();
-        //InputStreamReader isr = new InputStreamReader(con.getInputStream());
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream() , "UTF-8"));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = in.readLine()) != null){
-            response.append(inputLine);
-        }
-        in.close();
-        //String rspn = response.substring(13, response.length()-3);
-        JSONObject myResponse = new JSONObject(response.toString());
-        String resp = myResponse.getString("output");
-        cleverbotState = myResponse.getString("cs");
-        this.replyText(
-        replyToken,
-        resp
-        );
-        break;
     }
 
-}
-}
-
-private static String createUri(String path) {
-    return ServletUriComponentsBuilder.fromCurrentContextPath()
-    .path(path).build()
-    .toUriString();
-}
-
-private void system(String... args) {
-    ProcessBuilder processBuilder = new ProcessBuilder(args);
-    try {
-        Process start = processBuilder.start();
-        int i = start.waitFor();
-        log.info("result: {} =>  {}", Arrays.toString(args), i);
-    } catch (IOException e) {
-        throw new UncheckedIOException(e);
-    } catch (InterruptedException e) {
-        log.info("Interrupted", e);
-        Thread.currentThread().interrupt();
+    private static DownloadedContent createTempFile(String ext) {
+        String fileName = LocalDateTime.now().toString() + '-' + UUID.randomUUID().toString() + '.' + ext;
+        Path tempFile = KitchenSinkApplication.downloadedContentDir.resolve(fileName);
+        tempFile.toFile().deleteOnExit();
+        return new DownloadedContent(
+        tempFile,
+        createUri("/downloaded/" + tempFile.getFileName()));
     }
-}
 
-private static DownloadedContent saveContent(String ext, MessageContentResponse responseBody) {
-    log.info("Got content-type: {}", responseBody);
-
-    DownloadedContent tempFile = createTempFile(ext);
-    try (OutputStream outputStream = Files.newOutputStream(tempFile.path)) {
-        ByteStreams.copy(responseBody.getStream(), outputStream);
-        log.info("Saved {}: {}", ext, tempFile);
-        return tempFile;
-    } catch (IOException e) {
-        throw new UncheckedIOException(e);
+    @Value
+    public static class DownloadedContent {
+        Path path;
+        String uri;
     }
-}
-
-private static DownloadedContent createTempFile(String ext) {
-    String fileName = LocalDateTime.now().toString() + '-' + UUID.randomUUID().toString() + '.' + ext;
-    Path tempFile = KitchenSinkApplication.downloadedContentDir.resolve(fileName);
-    tempFile.toFile().deleteOnExit();
-    return new DownloadedContent(
-    tempFile,
-    createUri("/downloaded/" + tempFile.getFileName()));
-}
-
-@Value
-public static class DownloadedContent {
-    Path path;
-    String uri;
-}
 }
