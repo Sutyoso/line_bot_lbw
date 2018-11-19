@@ -261,7 +261,7 @@ public class KitchenSinkController {
                         if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
                         } else {
                             String t2 = doc.select("#detikdetailtext .lihatjg").text();
-                            String[] tx = t.split(t2);
+                            String[] tx = text.split(t2);
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
                         }
