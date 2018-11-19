@@ -252,8 +252,8 @@ public class KitchenSinkController {
                 String m = jj.getString("link");
                 Document doc = Jsoup.connect(m).get();
                 Elements links = doc.select("#detikdetailtext");
-                String message = "";
-                LinkedList<Message> messages = new LinkedList<Message>();
+                String news = "";
+                LinkedList<Message> news = new LinkedList<news>();
                 for (Element link : links) {
                     if (link.attr("id").equalsIgnoreCase("detikdetailtext")) {
                         message = doc.select("#detikdetailtext").text();
