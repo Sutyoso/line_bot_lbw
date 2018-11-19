@@ -206,23 +206,67 @@ public class KitchenSinkController {
         String t = tArr[0].toLowerCase();
         log.info("Got text message from {}: {}", replyToken, text);
         switch (t) {
-            case "mute": {
-                if(!bossStat){
-                    muteMode = true;
-                    this.replyText(replyToken,"cleverbot ngga bakal respon lagi. 'unmute' untuk mengaktifkan kembali cleverbot.");
-                }
-                break;
-            }
-            case "unmute": {
-                if(!bossStat){
-                    muteMode = false;
-                    this.replyText(replyToken,"cleverbot bakal respon lagi. 'mute' untuk menonaktifkan sementara cleverbot.");
-                }
-                break;
-            }
-            case "boss": {
+            // case "mute": {
+            //     if(!bossStat){
+            //         muteMode = true;
+            //         this.replyText(replyToken,"cleverbot ngga bakal respon lagi. 'unmute' untuk mengaktifkan kembali cleverbot.");
+            //     }
+            //     break;
+            // }
+            // case "unmute": {
+            //     if(!bossStat){
+            //         muteMode = false;
+            //         this.replyText(replyToken,"cleverbot bakal respon lagi. 'mute' untuk menonaktifkan sementara cleverbot.");
+            //     }
+            //     break;
+            // }
+            // case "boss": {
+            //     bossStat = true;
+            //     muteMode = false;
+            //     String url = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Frss.detik.com%2Findex.php%2Fdetikcom";
+            //     URL obj = new URL(url);
+            //     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            //     con.setRequestMethod("GET");
+            //     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream() , "UTF-8"));
+            //     String inputLine;
+            //     StringBuilder response = new StringBuilder();
+            //     while ((inputLine = in.readLine()) != null){
+            //         response.append(inputLine);
+            //     }
+            //     in.close();
+            //     JSONObject myResponse = new JSONObject(response.toString());
+            //     String aa = myResponse.get("items").toString();
+            //     String bb = aa.substring(1, aa.length() - 1);
+            //     JSONObject jj = new JSONObject(bb);
+            //     String m = jj.getString("link");
+            //     Document doc = Jsoup.connect(m).get();
+            //     Elements links = doc.select("#detikdetailtext");
+            //     String message = "";
+            //     LinkedList<Message> messages = new LinkedList<Message>();
+            //     for (Element link : links) {
+            //         if (link.attr("id").equalsIgnoreCase("detikdetailtext")) {
+            //             message = doc.select("#detikdetailtext").text();
+            //             messages.add(new TextMessage(message));
+            //             if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
+            //             } else {
+            //                 String t2 = doc.select("#detikdetailtext .lihatjg").text();
+            //                 String[] tx = t.split(t2);
+            //                 messages.add(new TextMessage(tx[0]));
+            //                 messages.add(new TextMessage(tx[tx.length - 1]));
+            //             }
+            //
+            //         }
+            //     }
+            //
+            //     this.reply(
+            //     replyToken,
+            //     messages
+            //     );
+            //
+            //     break;
+            // }
+            case "Boss": {
                 bossStat = true;
-                muteMode = false;
                 String url = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Frss.detik.com%2Findex.php%2Fdetikcom";
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -254,49 +298,72 @@ public class KitchenSinkController {
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
                         }
-
                     }
                 }
-
-                this.reply(
-                replyToken,
-                messages
-                );
-
+                this.reply(replyToken,messages);
                 break;
             }
-            case "noboss": {
+            case "Noboss": {
                 bossStat = false;
-                this.replyText(replyToken,"OK bosqu");
+                this.replyText(replyToken,"OK");
                 break;
             }
-            case "save": {
+            // case "save": {
+            //     if(!bossStat){
+            //         if(tArr.length<3){
+            //             this.replyText(replyToken,"data yang mau disimpan belum ada bosqu");
+            //         }
+            //         else{
+            //             String inputText = "";
+            //             for(int i = 2;i<tArr.length;i++){
+            //                 inputText += tArr[i]+" ";
+            //             }
+            //             storedText.put(tArr[1],inputText);
+            //             this.replyText(replyToken,"siap bosqu");
+            //         }
+            //
+            //     }
+            //     break;
+            // }
+            case "Save": {
                 if(!bossStat){
-                    if(tArr.length<3){
-                        this.replyText(replyToken,"data yang mau disimpan belum ada bosqu");
+                    if(text.indexOf( ' ' )<0){
+                        this.replyText(replyToken,"Data yang diberikan kurang lengkap");
                     }
                     else{
-                        String inputText = "";
-                        for(int i = 2;i<tArr.length;i++){
-                            inputText += tArr[i]+" ";
-                        }
-                        storedText.put(tArr[1],inputText);
-                        this.replyText(replyToken,"siap bosqu");
+                        index_1 = text.indexOf( ' ' );
+                        String key = text.substring(0,index_1);
+                        String value = text.substring(index_1+1,text.length());
+                        storedText.put(key,value);
+                        this.replyText(replyToken,"OK");
                     }
-
                 }
                 break;
             }
-            case "load": {
+            // case "load": {
+            //     if(!bossStat){
+            //         String r = "";
+            //         if(storedText.containsKey(tArr[1])){
+            //             r = storedText.get(tArr[1])+"";
+            //         }
+            //         else{
+            //             r = "kunci ngga ketemu bosqu";
+            //         }
+            //         this.replyText(replyToken,r);
+            //     }
+            //     break;
+            // }
+            case "Load": {
                 if(!bossStat){
-                    String r = "";
-                    if(storedText.containsKey(tArr[1])){
-                        r = storedText.get(tArr[1])+"";
+                    index_1 = text.indexOf( ' ' );
+                    String key = text.substring(0,index_1);
+
+                    if(storedText.containsKey(key)){
+                        r = storedText.get(key)+"";
                     }
                     else{
-                        r = "kunci ngga ketemu bosqu";
+                        r = "Kunci Pencarian Tidak Ditemukan";
                     }
-                    this.replyText(replyToken,r);
                 }
                 break;
             }
@@ -321,20 +388,34 @@ public class KitchenSinkController {
 
                     });
                 } else {
-                    this.replyText(replyToken, "Bot can't use profile API without user ID");
+                    // this.replyText(replyToken, "Bot can't use profile API without user ID");
+                    this.replyText(replyToken, "User ID tidak");
                 }
                 break;
             }
-            case "bye": {
+            // case "bye": {
+            //     Source source = event.getSource();
+            //     if (source instanceof GroupSource) {
+            //         this.replyText(replyToken, "Leaving group");
+            //         lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
+            //     } else if (source instanceof RoomSource) {
+            //         this.replyText(replyToken, "Leaving room");
+            //         lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
+            //     } else {
+            //         this.replyText(replyToken, "Bot can't leave from 1:1 chat");
+            //     }
+            //     break;
+            // }
+            case "Bye": {
                 Source source = event.getSource();
                 if (source instanceof GroupSource) {
-                    this.replyText(replyToken, "Leaving group");
+                    this.replyText(replyToken, "Byeee");
                     lineMessagingClient.leaveGroup(((GroupSource) source).getGroupId()).get();
                 } else if (source instanceof RoomSource) {
-                    this.replyText(replyToken, "Leaving room");
+                    this.replyText(replyToken, "Byeee");
                     lineMessagingClient.leaveRoom(((RoomSource) source).getRoomId()).get();
                 } else {
-                    this.replyText(replyToken, "Bot can't leave from 1:1 chat");
+                    this.replyText(replyToken, "Tidak dapat meninggalkan chat 1:1");
                 }
                 break;
             }
