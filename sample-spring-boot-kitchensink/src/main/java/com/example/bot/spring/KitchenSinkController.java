@@ -115,69 +115,6 @@ public class KitchenSinkController {
     }
 
     @EventMapping
-    public void handleStickerMessageEvent(MessageEvent<StickerMessageContent> event) {
-        handleSticker(event.getReplyToken(), event.getMessage());
-    }
-
-    @EventMapping
-    public void handleLocationMessageEvent(MessageEvent<LocationMessageContent> event) {
-        LocationMessageContent locationMessage = event.getMessage();
-        reply(event.getReplyToken(), new LocationMessage(
-        locationMessage.getTitle(),
-        locationMessage.getAddress(),
-        locationMessage.getLatitude(),
-        locationMessage.getLongitude()
-        ));
-    }
-
-    @EventMapping
-    public void handleImageMessageEvent(MessageEvent<ImageMessageContent> event) throws IOException {
-        // You need to install ImageMagick
-        handleHeavyContent(
-        event.getReplyToken(),
-        event.getMessage().getId(),
-        responseBody -> {
-            DownloadedContent jpg = saveContent("jpg", responseBody);
-            DownloadedContent previewImg = createTempFile("jpg");
-            system(
-            "convert",
-            "-resize", "240x",
-            jpg.path.toString(),
-            previewImg.path.toString());
-            reply(((MessageEvent) event).getReplyToken(),
-            new ImageMessage(jpg.getUri(), jpg.getUri()));
-        });
-    }
-
-    @EventMapping
-    public void handleAudioMessageEvent(MessageEvent<AudioMessageContent> event) throws IOException {
-        handleHeavyContent(
-        event.getReplyToken(),
-        event.getMessage().getId(),
-        responseBody -> {
-            DownloadedContent mp4 = saveContent("mp4", responseBody);
-            reply(event.getReplyToken(), new AudioMessage(mp4.getUri(), 100));
-        });
-    }
-
-    @EventMapping
-    public void handleVideoMessageEvent(MessageEvent<VideoMessageContent> event) throws IOException {
-        // You need to install ffmpeg and ImageMagick.
-        handleHeavyContent(
-        event.getReplyToken(),
-        event.getMessage().getId(),
-        responseBody -> {
-            DownloadedContent mp4 = saveContent("mp4", responseBody);
-            DownloadedContent previewImg = createTempFile("jpg");
-            system("convert",
-            mp4.path + "[0]",
-            previewImg.path.toString());
-            reply(((MessageEvent) event).getReplyToken(),
-            new VideoMessage(mp4.getUri(), previewImg.uri));
-        });
-    }
-
-    @EventMapping
     public void handleUnfollowEvent(UnfollowEvent event) {
         log.info("unfollowed this bot: {}", event);
     }
@@ -307,38 +244,18 @@ public class KitchenSinkController {
                 LinkedList<Message> messages = new LinkedList<Message>();
                 for (Element link : links) {
                     if (link.attr("id").equalsIgnoreCase("detikdetailtext")) {
-                        // System.out.println(link.attr("id")); //keluarannya nama id "detikdetailtext"
                         message = doc.select("#detikdetailtext").text();
                         messages.add(new TextMessage(message));
                         if (doc.select("#detikdetailtext .lihatjg").isEmpty()) {
-                            //System.out.println(t);
                         } else {
                             String t2 = doc.select("#detikdetailtext .lihatjg").text();
-                            //System.out.println(t2);
                             String[] tx = t.split(t2);
-                            //message = tx[0] + tx[tx.length - 1];
                             messages.add(new TextMessage(tx[0]));
                             messages.add(new TextMessage(tx[tx.length - 1]));
-                            //System.out.println(tx[0] + tx[tx.length - 1]);
                         }
 
                     }
                 }
-                //JSONArray arr = myResponse.getJSONArray("items");
-
-
-                /*
-                for(int i=0 ; i<4 ; i++){
-                String bb = arr.get(i).toString();
-                JSONObject jj = new JSONObject(bb);
-                String ex = jj.getString("content");
-                while (ex.charAt(0) != '>') {
-                ex = ex.substring(1);
-            }
-            ex = ex.substring(1);
-            messages.add(new TextMessage(ex));
-        }
-        */
 
         this.reply(
         replyToken,
@@ -346,10 +263,6 @@ public class KitchenSinkController {
         );
 
         break;
-        //bossStat = true;
-        //String berita = "Sebuah perusahaan untuk berhasil haruslah kompetitif. Salah satu kuncinya adalah melalui karya inovasi. Sebagai perusahaan, PLN menyadari betul bahwa ide-ide kreatif bisa muncul dari mana saja, dari karyawan dengan jenjang karier manapun. Karenanya, setiap tahun sejak 1999 menjelang Hari Listrik Nasional yang diperingati setiap tanggal 27 Oktober, PLN selalu menggelar ajang lomba karya inovasi. Seiring dengan berjalannya waktu, lomba karya inovasi ini dikemas dengan lebih kreatif dan menarik, yakni melalui Learning, Innovation, Knowledge & Exhibition ";
-        //this.replyText(replyToken,berita);
-        //break;
     }
     case "noboss": {
         bossStat = false;
